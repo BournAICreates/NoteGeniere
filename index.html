@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteGenie</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-header">
+                    <h1><i class="fas fa-graduation-cap"></i> NoteGenie</h1>
+                </div>
+                <nav class="sidebar-nav">
+                    <button id="newProjectBtn" class="btn btn-primary sidebar-btn">
+                        <i class="fas fa-plus"></i> New Project
+                    </button>
+                    <button id="dashboardBtn" class="btn btn-secondary sidebar-btn">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </button>
+                    <button id="chatBtn" class="btn btn-secondary sidebar-btn">
+                        <i class="fas fa-comments"></i> Chat
+                    </button>
+                    <button id="flashcardsBtn" class="btn btn-secondary sidebar-btn">
+                        <i class="fas fa-layer-group"></i> Flashcards
+                    </button>
+                    <button id="calendarBtn" class="btn btn-secondary sidebar-btn">
+                        <i class="fas fa-calendar-alt"></i> Calendar
+                    </button>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="user-actions">
+                    <span id="userWelcome" class="user-welcome" style="display: none;">
+                        Welcome, <span id="userName"></span>!
+                    </span>
+                    <button id="apiKeyBtn" class="btn btn-outline" style="display: none;">
+                        <i class="fas fa-key"></i> API Key
+                    </button>
+                    <button id="loginBtn" class="btn btn-outline">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button id="logoutBtn" class="btn btn-outline" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="view active">
+                <div class="dashboard-container">
+                    <h2>Your Projects</h2>
+                    <div id="projectsList" class="projects-grid">
+                        <!-- Projects will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note Generation View -->
+            <div id="noteGenerationView" class="view">
+                <div class="note-generation-container">
+                    <div class="input-section">
+                        <h2>Transform Your Transcription</h2>
+                        <div class="project-selector">
+                            <div class="project-dropdown-section">
+                                <label for="projectSelect">Select Project:</label>
+                                <select id="projectSelect" class="form-control">
+                                    <option value="">Choose a project...</option>
+                                </select>
+                            </div>
+                            <div class="project-create-section">
+                                <button id="createProjectBtn" class="btn btn-outline">
+                                    <i class="fas fa-plus"></i> Create New Project
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="transcription-input">
+                            <label for="transcriptionText">Paste your transcription here:</label>
+                            <textarea 
+                                id="transcriptionText" 
+                                class="form-control transcription-textarea"
+                                placeholder="Paste your academic transcription here... (lectures, literature, research papers, etc.)"
+                                rows="15"
+                            ></textarea>
+                            <div class="input-actions">
+                                <button id="generateNotesBtn" class="btn btn-primary btn-large">
+                                    <i class="fas fa-magic"></i> Generate Study Notes
+                                </button>
+                                <div class="char-count">
+                                    <span id="charCount">0</span> characters
+                                    <span id="charLimit" style="display: none; color: #e53e3e;"> (Limit: <span id="maxChars">100,000</span>)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="output-header">
+                            <h3>Generated Study Notes</h3>
+                            <div class="output-actions">
+                                <button id="saveNotesBtn" class="btn btn-success" disabled>
+                                    <i class="fas fa-save"></i> Save Notes
+                                </button>
+                                <button id="downloadNotesBtn" class="btn btn-download" disabled>
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        <div id="generatedNotes" class="generated-notes">
+                            <div class="placeholder">
+                                <i class="fas fa-file-alt"></i>
+                                <p>Your generated study notes will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendarView" class="view">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <h2>Study Notes Calendar</h2>
+                        <div class="calendar-controls">
+                            <button id="prevMonthBtn" class="btn btn-outline btn-sm">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="currentMonthYear" class="month-year-display"></span>
+                            <button id="nextMonthBtn" class="btn btn-outline btn-sm">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button id="todayBtn" class="btn btn-outline btn-sm">
+                                Today
+                            </button>
+                        </div>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid">
+                        <!-- Calendar will be dynamically generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flashcards View -->
+            <div id="flashcardsView" class="view">
+                <div class="flashcards-container">
+                    <div class="flashcards-header">
+                        <h2>All Flashcard Sets</h2>
+                        <p>Study flashcards from all your projects</p>
+                    </div>
+                    <div id="allFlashcardsList" class="flashcards-list">
+                        <!-- All flashcard sets will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat View -->
+            <div id="chatView" class="view">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h2><i class="fas fa-comments"></i> Jarvis AI Assistant</h2>
+                        <div class="chat-note-selector">
+                            <label for="chatNoteSelect">Select Note to Chat About:</label>
+                            <select id="chatNoteSelect" class="form-control">
+                                <option value="">Choose a note...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-welcome">
+                            <div class="welcome-message">
+                                <i class="fas fa-robot"></i>
+                                <h3>Welcome to AI Chat!</h3>
+                                <p>Select a note from the dropdown above to start chatting with Jarvis about your study material.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <div class="chat-input-wrapper">
+                            <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything about your notes..." disabled>
+                            <button id="sendChatBtn" class="btn btn-primary chat-send-btn" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Notes View -->
+            <div id="projectNotesView" class="view">
+                <div class="project-notes-container">
+                    <div class="project-header">
+                        <button id="backToDashboardBtn" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </button>
+                        <div class="project-title-section">
+                            <h2 id="projectTitle">Project Title</h2>
+                            <button id="renameProjectBtn" class="btn btn-outline btn-sm">
+                                <i class="fas fa-edit"></i> Rename
+                            </button>
+                        </div>
+                    </div>
+                    <div id="projectNotesList" class="notes-list">
+                        <!-- Notes will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Project Creation Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Project</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="projectNameInput" class="form-control" placeholder="Enter project name...">
+            </div>
+            <div class="modal-footer">
+                <button id="createProjectConfirmBtn" class="btn btn-primary">Create Project</button>
+                <button id="cancelProjectBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="renameModalTitle">Rename</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="renameInput" class="form-control" placeholder="Enter new name...">
+            </div>
+            <div class="modal-footer">
+                <button id="confirmRenameBtn" class="btn btn-primary">Confirm</button>
+                <button id="cancelRenameBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Assignment Modal -->
+    <div id="dateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Assign Date to Note</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="noteDateInput">Select Date:</label>
+                    <input type="date" id="noteDateInput" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="noteTimeInput">Time (optional):</label>
+                    <input type="time" id="noteTimeInput" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmDateBtn" class="btn btn-primary">Assign Date</button>
+                <button id="cancelDateBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Note Modal -->
+    <div id="calendarNoteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="calendarNoteModalTitle">Notes for <span id="selectedDate"></span></h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="calendarNotesList" class="calendar-notes-list">
+                    <!-- Notes for selected date will be displayed here -->
+                </div>
+                <div class="calendar-note-actions">
+                    <button id="createNoteForDateBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Note
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeCalendarNoteModalBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flashcard Generation Modal -->
+    <div id="flashcardModal" class="modal">
+        <div class="modal-content flashcard-modal-content">
+            <div class="modal-header">
+                <h3>Generate Flashcards</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="flashcard-generation-info">
+                    <p>AI will analyze the selected note and generate flashcards with key terms and definitions.</p>
+                    <div class="note-preview">
+                        <strong>Note:</strong> <span id="flashcardNoteTitle"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmFlashcardGenerationBtn" class="btn btn-primary">
+                    <i class="fas fa-layer-group"></i> Generate Flashcards
+                </button>
+                <button id="cancelFlashcardGenerationBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flashcard Study Modal -->
+    <div id="flashcardStudyModal" class="modal">
+        <div class="modal-content flashcard-study-modal-content">
+            <div class="modal-header">
+                <h3 id="flashcardStudyTitle">Study Flashcards</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="flashcard-progress">
+                    <span id="flashcardProgress">1 of 5</span>
+                    <div class="progress-bar">
+                        <div id="flashcardProgressBar" class="progress-fill"></div>
+                    </div>
+                </div>
+                <div id="flashcardContainer" class="flashcard-container">
+                    <!-- Flashcards will be displayed here -->
+                </div>
+                <div class="flashcard-controls">
+                    <button id="prevFlashcardBtn" class="btn btn-outline" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <button id="flipFlashcardBtn" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> Flip Card
+                    </button>
+                    <button id="nextFlashcardBtn" class="btn btn-outline">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeFlashcardStudyBtn" class="btn btn-secondary">Close Study</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Edit Modal -->
+    <div id="noteEditModal" class="modal">
+        <div class="modal-content note-edit-modal-content">
+            <div class="modal-header">
+                <h3>Edit Note</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editNoteTitle">Note Title:</label>
+                    <input type="text" id="editNoteTitle" class="form-control" placeholder="Enter note title...">
+                </div>
+                <div class="form-group">
+                    <label for="editNoteContent">Note Content:</label>
+                    <textarea id="editNoteContent" class="form-control" rows="15" placeholder="Enter note content..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveNoteEditBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button id="cancelNoteEditBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note View Modal -->
+    <div id="noteViewModal" class="modal">
+        <div class="modal-content note-view-modal-content">
+            <div class="modal-header">
+                <h3 id="noteViewTitle">View Note</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="noteViewContent" class="note-view-content">
+                    <!-- Note content will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeNoteViewBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Generation Options Modal -->
+    <div id="testOptionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Generate Test</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Question types to include:</label>
+                    <div style="display:flex; gap:1rem; flex-wrap:wrap">
+                        <label style="display:flex; align-items:center; gap:0.5rem"><input type="checkbox" id="optMCQ" checked> Multiple Choice</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem"><input type="checkbox" id="optTF" checked> True/False</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem"><input type="checkbox" id="optSA" checked> Short Answer</label>
+                    </div>
+                </div>
+                <!-- No counts needed; AI will choose a balanced number of questions -->
+            </div>
+            <div class="modal-footer">
+                <button id="confirmTestGenerationBtn" class="btn btn-primary">
+                    <i class="fas fa-file-alt"></i> Generate Test
+                </button>
+                <button id="cancelTestGenerationBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test View Modal -->
+    <div id="testViewModal" class="modal">
+        <div class="modal-content" style="max-width:1100px; width:95%">
+            <div class="modal-header">
+                <h3 id="testViewTitle">Generated Test</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Quiz Progress Bar -->
+                <div id="quizProgress" class="quiz-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="currentQuestionNum">1</span> of <span id="totalQuestions">10</span>
+                    </div>
+                </div>
+                
+                <!-- Quiz Container -->
+                <div id="quizContainer" class="quiz-container" style="display: none;">
+                    <div id="quizQuestion" class="quiz-question"></div>
+                    <div id="quizOptions" class="quiz-options"></div>
+                    <div id="quizAnswer" class="quiz-answer" style="display: none;"></div>
+                </div>
+                
+                <!-- All Questions View (for review) -->
+                <div id="testViewContent" class="note-view-content"></div>
+            </div>
+            <div class="modal-footer">
+                <!-- Quiz Navigation -->
+                <div id="quizNavigation" class="quiz-navigation" style="display: none;">
+                    <button id="prevQuestionBtn" class="btn btn-secondary" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <button id="nextQuestionBtn" class="btn btn-primary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button id="finishQuizBtn" class="btn btn-success" style="display: none;">
+                        <i class="fas fa-flag-checkered"></i> Finish Quiz
+                    </button>
+                </div>
+                
+                <!-- Original Buttons -->
+                <div id="originalButtons">
+                    <button id="startQuizBtn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Quiz
+                    </button>
+                    <button id="submitTestBtn" class="btn btn-primary" style="display: none;">
+                        <i class="fas fa-check"></i> Submit Test
+                    </button>
+                    <button id="showAnswersBtn" class="btn btn-outline" style="display: none;">
+                        <i class="fas fa-eye"></i> Show Answers
+                    </button>
+                    <button id="retakeTestBtn" class="btn btn-secondary" style="display: none;">
+                        <i class="fas fa-redo"></i> Retake
+                    </button>
+                    <button id="closeTestViewBtn" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modals -->
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sign-in-alt"></i> Login to Your Account</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label" title="Keep me logged in for 7 days">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                    <div class="auth-links">
+                        <a href="#" id="forgotPasswordLink">Forgot your password?</a>
+                        <p>Don't have an account? <a href="#" id="showRegisterLink">Sign up here</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Create New Account</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="registerName">Full Name</label>
+                        <input type="text" id="registerName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email Address</label>
+                        <input type="email" id="registerEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" class="form-control" required minlength="8">
+                        <small class="form-text">Password must be at least 8 characters long</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                    <div class="auth-links">
+                        <p>Already have an account? <a href="#" id="showLoginLink">Login here</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Reset Password</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="forgotPasswordForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="resetEmail">Email Address</label>
+                        <input type="email" id="resetEmail" class="form-control" required>
+                        <small class="form-text">We'll send you a link to reset your password</small>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-paper-plane"></i> Send Reset Link
+                        </button>
+                    </div>
+                    <div class="auth-links">
+                        <p><a href="#" id="backToLoginLink">Back to login</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Management Modal -->
+    <div id="apiKeyModal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Manage API Key</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="api-key-info">
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <p>To use AI features, you need a Google Gemini API key. Get yours free at <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>.</p>
+                    </div>
+                </div>
+                
+                <form id="apiKeyForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="apiKeyInput">Gemini API Key</label>
+                        <div class="input-group">
+                            <input type="password" id="apiKeyInput" class="form-control" placeholder="Enter your Gemini API key" required>
+                            <button type="button" id="toggleApiKeyVisibility" class="btn btn-outline">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="form-text">Your API key is encrypted and stored securely in your account</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-save"></i> Save API Key
+                        </button>
+                    </div>
+                    
+                    <div class="api-key-status" id="apiKeyStatus" style="display: none;">
+                        <div class="status-message">
+                            <i class="fas fa-check-circle"></i>
+                            <span>API key saved successfully!</span>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="api-key-help">
+                    <h4><i class="fas fa-question-circle"></i> How to get your API key:</h4>
+                    <ol>
+                        <li>Go to <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+                        <li>Sign in with your Google account</li>
+                        <li>Click "Create API Key"</li>
+                        <li>Copy the generated key and paste it above</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>AI is analyzing your transcription...</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">This may take a few moments</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script src="config.js"></script>
+    <script src="api-config-firebase.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
